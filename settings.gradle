@@ -1,0 +1,2 @@
+include ':app', ':multi_broadcastreciver'
+rootProject.name='MultiBroadcast'
