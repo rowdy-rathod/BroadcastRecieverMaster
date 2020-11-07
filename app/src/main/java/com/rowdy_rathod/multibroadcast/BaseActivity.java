@@ -7,7 +7,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.util.Log;
+import android.telephony.SmsMessage;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -17,8 +17,11 @@ import com.rowdy_rathod.multi_broadcastreciver.interfaces.GlobalReceiverCallBack
 import com.rowdy_rathod.multi_broadcastreciver.receiverHelper.Session;
 
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
+
 // This is a can apply multiple broadcast receiver in single activity or base activity.
+// for that is import sdk
 public class BaseActivity extends AppCompatActivity implements GlobalReceiverCallBack {
+    public static final String SMS_BUNDLE = "pdus";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -54,7 +57,25 @@ public class BaseActivity extends AppCompatActivity implements GlobalReceiverCal
                     Toast.makeText(context, "GPS Off", Toast.LENGTH_SHORT).show();
                 }
             } else if (intent.getAction().matches("android.provider.Telephony.SMS_RECEIVED")) {
+                Bundle intentExtras = intent.getExtras();
+                if (intentExtras != null) {
+                    Object[] sms = (Object[]) intentExtras.get(SMS_BUNDLE);
+                    String smsMessageStr = "";
+                    for (int i = 0; i < sms.length; ++i) {
+                        SmsMessage smsMessage = SmsMessage.createFromPdu((byte[]) sms[i]);
 
+                        String smsBody = smsMessage.getMessageBody().toString();
+                        String address = smsMessage.getOriginatingAddress();
+
+                        smsMessageStr += "SMS From: " + address + "\n";
+                        smsMessageStr += smsBody + "\n";
+                    }
+                    Toast.makeText(context, smsMessageStr, Toast.LENGTH_SHORT).show();
+
+                    //this will update the UI with message
+//            SmsActivity inst = SmsActivity.instance();
+//            inst.updateList(smsMessageStr);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
